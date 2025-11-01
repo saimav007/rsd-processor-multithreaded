@@ -89,7 +89,8 @@ typedef enum logic [2:0]
     FP_MOP_TYPE_OTHER  = 3'b101
 } FPMicroOpSubType;
 
-typedef union packed    // OpSubType
+typedef union packed    
+// OpSubType
 {
     IntMicroOpSubType     intType;
     ComplexMicroOpSubType complexType;
@@ -106,7 +107,8 @@ typedef struct packed // OpId
 } OpId;
 
 // The type of operand.
-typedef enum logic [1:0]    // enum OperandType
+typedef enum logic [1:0]    
+// enum OperandType
 {
     OOT_REG = 2'b00,   // Register
     OOT_IMM = 2'b01,   // Immediate
@@ -120,7 +122,8 @@ typedef enum logic [1:0]    // enum OperandType
 //
 
 // Int: 6+6+6+ 4+ 1+ 30=53 bits
-typedef struct packed // IntMicroOpOperand
+typedef struct packed 
+// IntMicroOpOperand
 {
     // 論理レジスタ番号
     LRegNumPath dstRegNum;
@@ -138,7 +141,8 @@ typedef struct packed // IntMicroOpOperand
 } IntMicroOpOperand;
 
 // Mem: 6+6+6 +1+1+3 +8 +15 +12 = 18+5+8+10+12 = 53 bits
-typedef struct packed // MemMicroOpOperand
+typedef struct packed 
+// MemMicroOpOperand
 {
     // 論理レジスタ番号
     LRegNumPath dstRegNum;
@@ -157,7 +161,8 @@ typedef struct packed // MemMicroOpOperand
 } MemMicroOpOperand;
 
 // Branch:6+6+6 +15 +20=53 bits
-typedef struct packed // BrMicroOpOperand
+typedef struct packed 
+// BrMicroOpOperand
 {
     // 論理レジスタ番号
     LRegNumPath dstRegNum;
@@ -168,7 +173,8 @@ typedef struct packed // BrMicroOpOperand
 } BrMicroOpOperand;
 
 // Complex Integer: 6+6+6 +1 +16 +18 = 35+18= 53 bits
-typedef struct packed // ComplexMicroOpOperand
+typedef struct packed 
+// ComplexMicroOpOperand
 {
     // 論理レジスタ番号
     LRegNumPath dstRegNum;
@@ -184,7 +190,8 @@ typedef struct packed // ComplexMicroOpOperand
 } ComplexMicroOpOperand;
 
 // MiscMem: 6+6+6 +1 +16 +18 = 35+18= 53 bits
-typedef struct packed // MiscMemMicroOpOperand
+typedef struct packed 
+// MiscMemMicroOpOperand
 {
     // 論理レジスタ番号
     LRegNumPath dstRegNum;
@@ -199,7 +206,8 @@ typedef struct packed // MiscMemMicroOpOperand
 } MiscMemMicroOpOperand;
 
 // MiscMem: 6+6+6 +3+1 +19 +12 = 18+4+19+12= 53 bits
-typedef struct packed // SystemMicroOpOperand
+typedef struct packed 
+// SystemMicroOpOperand
 {
     // 論理レジスタ番号
     LRegNumPath dstRegNum;
@@ -215,7 +223,8 @@ typedef struct packed // SystemMicroOpOperand
 } SystemMicroOpOperand;
 
 //FPMicroOpOperand: 6+6+6+6 +5+3 +21 = 53 bits
-typedef struct packed // FPMicroOpOperand
+typedef struct packed 
+// FPMicroOpOperand
 {
     // 論理レジスタ番号
     LRegNumPath dstRegNum;
@@ -228,7 +237,8 @@ typedef struct packed // FPMicroOpOperand
     logic [20:0] padding;        // Padding field.
 } FPMicroOpOperand;
 
-typedef union packed    // MicroOpOperand
+typedef union packed    
+// MicroOpOperand
 {
     IntMicroOpOperand     intOp;
     MemMicroOpOperand     memOp;
@@ -242,9 +252,11 @@ typedef union packed    // MicroOpOperand
 } MicroOpOperand;
 
 
-typedef struct packed // OpInfo
+typedef struct packed 
+// OpInfo
 {
     // 条件コード
+    ThreadID threadID;
     CondCode cond;
 
     // 命令の種類

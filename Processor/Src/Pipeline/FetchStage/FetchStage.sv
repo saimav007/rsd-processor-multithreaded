@@ -179,6 +179,8 @@ module FetchStage(
 `ifndef RSD_DISABLE_DEBUG_REGISTER
             nextStage[i].sid = pipeReg[i].sid;
 `endif
+            // Propagate threadID from pipeReg to nextStage
+            nextStage[i].threadID = pipeReg[i].threadID;
             nextStage[i].pc = pipeReg[i].pc;
             nextStage[i].brPred = regStall ? regBrPred[i] : brPred[i];
             nextStage[i].insn = pipeReg[i].valid ? 

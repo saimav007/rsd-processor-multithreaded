@@ -5,6 +5,9 @@ package BasicTypes;
 
 import MicroArchConf::*;
 
+// define thread id
+localparam NUM_THREADS = 2;
+typedef logic [$clog2(NUM_THREADS)-1:0] ThreadID;
 
 localparam TRUE  = 1'b1;
 localparam FALSE = 1'b0;

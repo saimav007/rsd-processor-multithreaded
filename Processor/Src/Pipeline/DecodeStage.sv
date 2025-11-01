@@ -110,6 +110,8 @@ module DecodeStage(
         for (int i = 0; i < DECODE_WIDTH; i++) begin
             for (int j = 0; j < MICRO_OP_MAX_NUM; j++) begin
                 microOps[i*MICRO_OP_MAX_NUM + j] = pipeReg[i].microOps[j];
+                // Assign threadID to each micro-op
+                microOps[i*MICRO_OP_MAX_NUM + j].threadID = pipeReg[i].threadID;
             end
             insnInfo[i] = pipeReg[i].insnInfo;
         end
@@ -269,6 +271,7 @@ module DecodeStage(
             nextStage[i].opInfo = microOps[ mopPickedIndex[i] ];
 
             nextStage[i].valid = insnValidOut[orgPickedInsnLane] && mopPicked[i] && !clear;
+            nextStage[i].threadID = pipeReg[orgPickedInsnLane].threadID;
             nextStage[i].pc = pipeReg[orgPickedInsnLane].pc;
             nextStage[i].bPred = brPredOut[orgPickedInsnLane];  
 

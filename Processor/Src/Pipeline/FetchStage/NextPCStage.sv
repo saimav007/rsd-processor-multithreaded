@@ -91,6 +91,19 @@ module NextPCStage(
     logic stall, clear;
     logic regStall, beginStall;
     logic writePC_FromOuter;
+
+    // Round-robin thread scheduler
+    ThreadID nextThreadID;
+    ThreadID selectedThread;
+    logic threadReady[NUM_THREADS];
+    logic threadSelected;
+    FlipFlop#(.FF_WIDTH($clog2(NUM_THREADS)), .RESET_VALUE(0)) 
+        roundRobinFF(
+            .out(selectedThread),
+            .in(nextThreadID),
+            .clk(port.clk),
+            .rst(port.rst)
+        );
     always_ff @(posedge port.clk) begin
         if (port.rst) begin
             regStall <= FALSE;
@@ -127,10 +140,70 @@ module NextPCStage(
         //   1) if PC is written from outside
         //   2) if it is beginning of stall
         //   (see the comment of regBrPred in FetchStage.sv)
-        port.pcWE = 
-            (writePC_FromOuter || !stall || beginStall) && !port.rst;
+        // pcWE is thread-aware - only enable for selected thread
+        for (int t = 0; t < NUM_THREADS; t++) begin
+            if (t == selectedThread) begin
+                port.pcWE[t] = 
+                    (writePC_FromOuter || !stall || beginStall) && !port.rst;
+            end
+            else begin
+                port.pcWE[t] = FALSE;
+            end
+        end
     end
 
+
+    //
+    // Round-robin thread selection logic
+    //
+    always_comb begin
+        // Check which threads are ready (have valid PC and are not in recovery)
+        // A thread is ready if:
+        //  1. Not in recovery phase
+        //  2. Not recovering from rename stage
+        //  3. Not stalled or beginning of stall
+        for (int t = 0; t < NUM_THREADS; t++) begin
+            threadReady[t] = !recovery.toRecoveryPhase && !recovery.recoverFromRename;
+        end
+
+        // Round-robin selection: alternate between threads
+        // Advance to next thread when we successfully fetch (not stalled)
+        nextThreadID = selectedThread;
+        threadSelected = FALSE;
+
+        // If not stalled and successfully fetching, advance to next thread in round-robin
+        if (!stall && !clear && !port.rst && threadReady[selectedThread]) begin
+            // Advance to next thread in round-robin order
+            ThreadID nextCandidate = (selectedThread + 1) % NUM_THREADS;
+            
+            // Try next thread first
+            if (threadReady[nextCandidate]) begin
+                nextThreadID = nextCandidate;
+                threadSelected = TRUE;
+            end
+            // If next thread not ready, try current thread
+            else if (threadReady[selectedThread]) begin
+                nextThreadID = selectedThread;
+                threadSelected = TRUE;
+            end
+        end
+        // If stalled or clearing, keep current thread selection
+        else begin
+            // Try to find any ready thread
+            for (int attempt = 0; attempt < NUM_THREADS; attempt++) begin
+                ThreadID candidateThread = (selectedThread + attempt) % NUM_THREADS;
+                if (threadReady[candidateThread] && !threadSelected) begin
+                    nextThreadID = candidateThread;
+                    threadSelected = TRUE;
+                end
+            end
+            
+            // If no thread is ready, keep current thread
+            if (!threadSelected) begin
+                nextThreadID = selectedThread;
+            end
+        end
+    end
 
     //
     // Branch Prediction
@@ -138,6 +211,7 @@ module NextPCStage(
     always_comb begin
 
         // Decide the address to input to the branch predictor
+        // Use PC of the selected thread
         if (recovery.toRecoveryPhase) begin
             // Branch misprediction or an exception etc. is detected
             // Refetch instruction specified by Rw, Cm stage
@@ -148,8 +222,8 @@ module NextPCStage(
             predNextPC = recovery.recoveredPC_FromRename;
         end
         else begin
-            // Use current PC
-            predNextPC = port.pcOut;
+            // Use current PC of selected thread
+            predNextPC = port.pcOut[selectedThread];
 
             for (int i = 0; i < FETCH_WIDTH; i++) begin
                 // Process of branch prediction:
@@ -174,38 +248,47 @@ module NextPCStage(
     //
     always_comb begin
 
-        // --- PC
+        // --- PC Update for selected thread
         if (port.interruptAddrWE) begin
             // When an interrupt occurs, use interrupt address.
             // NOTE: This input can be a critical path.
             // Hence, interrupt address is input to PC first rather than 
             // input to the branch predictor directly.
-            port.pcIn = port.interruptAddrIn;
+            port.pcIn[selectedThread] = port.interruptAddrIn;
         end
         else if (beginStall) begin
             // Update PC based on the branch prediction result accessed
             // immediately before the stall if it is beginning of stall.
             // (see the comment of regBrPred in FetchStage.sv)
-            port.pcIn = predNextPC;
+            port.pcIn[selectedThread] = predNextPC;
         end
         else begin
             // Increment PC
-            port.pcIn = predNextPC + FETCH_WIDTH*INSN_BYTE_WIDTH;
+            port.pcIn[selectedThread] = predNextPC + FETCH_WIDTH*INSN_BYTE_WIDTH;
             for (int i = 1; i < FETCH_WIDTH; i++) begin
                 if (StepOverCacheLine(predNextPC, 
                                      predNextPC+i*INSN_BYTE_WIDTH)) begin
                     // When PC stepped over the border of cache line, stop there
-                    port.pcIn = predNextPC+i*INSN_BYTE_WIDTH;
+                    port.pcIn[selectedThread] = predNextPC+i*INSN_BYTE_WIDTH;
                     break;
                 end
             end
         end
 
+        // For other threads, keep PC unchanged when not selected
+        for (int t = 0; t < NUM_THREADS; t++) begin
+            if (t != selectedThread) begin
+                port.pcIn[t] = port.pcOut[t];
+            end
+        end
+
+        // Assign threadID and other fields for each fetch lane
         for (int i = 0; i < FETCH_WIDTH; i++) begin
 `ifndef RSD_DISABLE_DEBUG_REGISTER
             // Generate serial id for dumping
             nextStage[i].sid = curSID + i;
 `endif
+            nextStage[i].threadID = selectedThread;
             nextStage[i].pc = predNextPC + i * INSN_BYTE_WIDTH;
             if (port.interruptAddrWE || clear ||
                 StepOverCacheLine(predNextPC, nextStage[i].pc)) begin

@@ -13,10 +13,10 @@ import MemoryMapTypes::*;
 
 interface NextPCStageIF( input logic clk, rst, rstStart );
     
-    // PC
-    logic    pcWE;
-    PC_Path  pcOut;
-    PC_Path  pcIn;
+    // PC initialsed as array of thread aware
+    logic    pcWE[NUM_THREADS];
+    PC_Path  pcOut[NUM_THREADS];
+    PC_Path  pcIn[NUM_THREADS];
 
     PC_Path  predNextPC;
 
@@ -34,9 +34,12 @@ interface NextPCStageIF( input logic clk, rst, rstStart );
     // Pipeline register
     FetchStageRegPath nextStage[ FETCH_WIDTH ];
 
+//make the PC modport thread aware
     modport PC(
     input
-        clk, rst, pcWE, pcIn,
+        clk, rst,
+        ThreadID tid, 
+        pcWE, pcIn,
     output
         pcOut
     );

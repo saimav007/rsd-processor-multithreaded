@@ -57,15 +57,26 @@ module PreDecodeStage(
     end
 
     // Micro op decoder
-    OpInfo [DECODE_WIDTH-1:0][MICRO_OP_MAX_NUM-1:0] microOps;  // Decoded micro ops
+    OpInfo [DECODE_WIDTH-1:0][MICRO_OP_MAX_NUM-1:0] microOps_raw;  // Decoded micro ops from decoder
+    OpInfo [DECODE_WIDTH-1:0][MICRO_OP_MAX_NUM-1:0] microOps;  // Decoded micro ops with threadID assigned
     InsnInfo [DECODE_WIDTH-1:0] insnInfo;   // Whether a decoded instruction is branch or not.
     for (genvar i = 0; i < DECODE_WIDTH; i++) begin
         Decoder decoder(
             .insn(pipeReg[i].insn),
             .insnInfo(insnInfo[i]),
-            .microOps(microOps[i]),
+            .microOps(microOps_raw[i]),
             .illegalPC(illegalPC[i])
         );
+    end
+
+    // Assign threadID to decoded micro-ops
+    always_comb begin
+        for (int i = 0; i < DECODE_WIDTH; i++) begin
+            for (int j = 0; j < MICRO_OP_MAX_NUM; j++) begin
+                microOps[i][j] = microOps_raw[i][j];
+                microOps[i][j].threadID = pipeReg[i].threadID;
+            end
+        end
     end
 
     // Pipeline control
@@ -84,6 +95,7 @@ module PreDecodeStage(
                 (stall || clear || port.rst) ? FALSE : pipeReg[i].valid;
             
             // Decoded micro-op and context.
+            nextStage[i].threadID = pipeReg[i].threadID;
             nextStage[i].insn = pipeReg[i].insn;
             nextStage[i].pc = pipeReg[i].pc;
             nextStage[i].brPred = pipeReg[i].brPred;

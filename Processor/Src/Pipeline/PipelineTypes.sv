@@ -22,7 +22,8 @@ import CacheSystemTypes::*;
 
 // Controll of a pipeline
 // See comments in Controller
-typedef struct packed// struct PipelineControll
+typedef struct packed
+// struct PipelineControll
 {
     logic stall;
     logic clear;
@@ -76,28 +77,33 @@ typedef struct packed { // FetchStageRegPath
     OpSerial sid;
 `endif
     logic valid;
+    ThreadID threadID;
     PC_Path pc;
 } FetchStageRegPath;
 
-typedef struct packed // PreDecodeStageRegPath
+typedef struct packed 
+// PreDecodeStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpSerial sid;
 `endif
 
     logic    valid;     // Valid flag. If this is 0, this op is treated as NOP.
+    ThreadID threadID;
     InsnPath insn;      // Instruction code
     PC_Path pc;
     BranchPred brPred;
 } PreDecodeStageRegPath;
 
-typedef struct packed // DecodeStageRegPath
+typedef struct packed 
+// DecodeStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpSerial sid;
 `endif
 
     logic    valid;     // Valid flag. If this is 0, this op is treated as NOP.
+    ThreadID threadID;
     InsnPath insn;      // Instruction code
     PC_Path pc;
     BranchPred brPred;
@@ -107,25 +113,29 @@ typedef struct packed // DecodeStageRegPath
 } DecodeStageRegPath;
 
 
-typedef struct packed // RenameStageRegPath
+typedef struct packed 
+// RenameStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpId      opId;
 `endif
 
     logic    valid;     // Valid flag. If this is 0, this op is treated as NOP.
+    ThreadID threadID;
     OpInfo   opInfo;    // Decoded micro op.
     PC_Path pc;
     BranchPred bPred;
 } RenameStageRegPath;
 
-typedef struct packed // DispatchStageRegPath
+typedef struct packed 
+// DispatchStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpId      opId;
 `endif
 
     logic    valid;     // Valid flag. If this is 0, this op is treated as NOP.
+    ThreadID threadID;
     OpInfo   opInfo;    // Decoded micro op.
 
     PC_Path pc;        // Program counter
@@ -155,33 +165,39 @@ typedef struct packed // DispatchStageRegPath
     StoreQueueIndexPath storeQueueRecoveryPtr;
 } DispatchStageRegPath;
 
-typedef struct packed // IssueStageRegPath
+typedef struct packed 
+// IssueStageRegPath
 {
     logic    valid;     // Valid flag. If this is 0, this op is treated as NOP.
+    ThreadID threadID;
     IssueQueueIndexPath issueQueuePtr;
 } IssueStageRegPath;
 
 //
 // Integer back end
 //
-typedef struct packed // IntegerRegisterReadStageRegPath
+typedef struct packed 
+// IntegerRegisterReadStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpId      opId;
 `endif
 
     logic valid;     // Valid flag. If this is 0, its op is treated as NOP.
+    ThreadID threadID;
     IntIssueQueueEntry intQueueData;
 } IntegerRegisterReadStageRegPath;
 
 
-typedef struct packed // IntegerExecutionStageRegPath
+typedef struct packed 
+// IntegerExecutionStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpId      opId;
 `endif
 
     logic valid;      // Valid flag. If this is 0, its op is treated as NOP.
+    ThreadID threadID;
     IntIssueQueueEntry intQueueData;
 
     // register read out
@@ -193,7 +209,8 @@ typedef struct packed // IntegerExecutionStageRegPath
 } IntegerExecutionStageRegPath;
 
 
-typedef struct packed // IntegerRegisterWriteStageRegPath
+typedef struct packed 
+// IntegerRegisterWriteStageRegPath
 {
 
 `ifndef RSD_DISABLE_DEBUG_REGISTER
@@ -201,6 +218,7 @@ typedef struct packed // IntegerRegisterWriteStageRegPath
 `endif
 
     logic valid;  // Valid flag. If this is 0, its op is treated as NOP.
+    ThreadID threadID;
     IntIssueQueueEntry intQueueData;
 
     PRegDataPath dataOut;   // Result of ALU/shifter/Load
@@ -212,25 +230,29 @@ typedef struct packed // IntegerRegisterWriteStageRegPath
 //
 // ComplexInteger back end
 //
-typedef struct packed // ComplexIntegerRegisterReadStageRegPath
+typedef struct packed 
+// ComplexIntegerRegisterReadStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpId      opId;
 `endif
 
     logic valid;     // Valid flag. If this is 0, its op is treated as NOP.
+    ThreadID threadID;
     logic replay;
     ComplexIssueQueueEntry complexQueueData;
 } ComplexIntegerRegisterReadStageRegPath;
 
 
-typedef struct packed // ComplexIntegerExecutionStageRegPath
+typedef struct packed 
+// ComplexIntegerExecutionStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpId      opId;
 `endif
 
     logic valid;      // Valid flag. If this is 0, its op is treated as NOP.
+    ThreadID threadID;
     logic replay;
     logic isFlushed;
     ComplexIssueQueueEntry complexQueueData;
@@ -244,7 +266,8 @@ typedef struct packed // ComplexIntegerExecutionStageRegPath
 } ComplexIntegerExecutionStageRegPath;
 
 
-typedef struct packed // ComplexIntegerRegisterWriteStageRegPath
+typedef struct packed 
+// ComplexIntegerRegisterWriteStageRegPath
 {
 
 `ifndef RSD_DISABLE_DEBUG_REGISTER
@@ -252,6 +275,7 @@ typedef struct packed // ComplexIntegerRegisterWriteStageRegPath
 `endif
 
     logic valid;  // Valid flag. If this is 0, its op is treated as NOP.
+    ThreadID threadID;
     ComplexIssueQueueEntry complexQueueData;
 
     PRegDataPath dataOut;   // Result of Execution
@@ -261,13 +285,15 @@ typedef struct packed // ComplexIntegerRegisterWriteStageRegPath
 //
 // Memory back end
 //
-typedef struct packed // MemoryRegisterReadStageRegPath
+typedef struct packed 
+// MemoryRegisterReadStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpId      opId;
 `endif
 
     logic valid;     // Valid flag. If this is 0, its op is treated as NOP.
+    ThreadID threadID;
     MemIssueQueueEntry memQueueData;
 
     // For release of the entries of an issue queue. See comments in MemoryExecutionStage.
@@ -276,13 +302,15 @@ typedef struct packed // MemoryRegisterReadStageRegPath
 } MemoryRegisterReadStageRegPath;
 
 
-typedef struct packed // MemoryExecutionStageRegPath
+typedef struct packed 
+// MemoryExecutionStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpId      opId;
 `endif
 
     logic valid;      // Valid flag. If this is 0, its op is treated as NOP.
+    ThreadID threadID;
     MemIssueQueueEntry memQueueData;
 
     // register read out
@@ -299,13 +327,15 @@ typedef struct packed // MemoryExecutionStageRegPath
 } MemoryExecutionStageRegPath;
 
 
-typedef struct packed // MemoryTagAccessStageRegPath
+typedef struct packed 
+// MemoryTagAccessStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpId      opId;
 `endif
 
     logic valid;      // Valid flag. If this is 0, its op is treated as NOP.
+    ThreadID threadID;
     MemIssueQueueEntry memQueueData;
 
     logic condEnabled;      // 条件コードは有効か
@@ -319,13 +349,15 @@ typedef struct packed // MemoryTagAccessStageRegPath
 } MemoryTagAccessStageRegPath;
 
 
-typedef struct packed // MemoryAccessStageRegPath
+typedef struct packed 
+// MemoryAccessStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpId      opId;
 `endif
 
     logic    valid;      // Valid flag. If this is 0, its op is treated as NOP.
+    ThreadID threadID;
 
     logic isStore;
     logic isLoad;
@@ -356,13 +388,15 @@ typedef struct packed // MemoryAccessStageRegPath
 } MemoryAccessStageRegPath;
 
 
-typedef struct packed // MemoryRegisterWriteStageRegPath
+typedef struct packed 
+// MemoryRegisterWriteStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpId      opId;
 `endif
 
     logic    valid;     // Valid flag. If this is 0, its op is treated as NOP.
+    ThreadID threadID;
     ActiveListIndexPath activeListPtr;
     LoadQueueIndexPath loadQueueRecoveryPtr;
     StoreQueueIndexPath storeQueueRecoveryPtr;
@@ -384,25 +418,29 @@ typedef struct packed // MemoryRegisterWriteStageRegPath
 //
 // FP back end
 //
-typedef struct packed // FPRegisterReadStageRegPath
+typedef struct packed 
+// FPRegisterReadStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpId      opId;
 `endif
 
     logic valid;     // Valid flag. If this is 0, its op is treated as NOP.
+    ThreadID threadID;
     logic replay;
     FPIssueQueueEntry fpQueueData;
 } FPRegisterReadStageRegPath;
 
 
-typedef struct packed // FPExecutionStageRegPath
+typedef struct packed 
+// FPExecutionStageRegPath
 {
 `ifndef RSD_DISABLE_DEBUG_REGISTER
     OpId      opId;
 `endif
 
     logic valid;      // Valid flag. If this is 0, its op is treated as NOP.
+    ThreadID threadID;
     logic replay;
     logic isFlushed;
     FPIssueQueueEntry fpQueueData;
@@ -417,7 +455,8 @@ typedef struct packed // FPExecutionStageRegPath
 } FPExecutionStageRegPath;
 
 
-typedef struct packed // FPRegisterWriteStageRegPath
+typedef struct packed 
+// FPRegisterWriteStageRegPath
 {
 
 `ifndef RSD_DISABLE_DEBUG_REGISTER
@@ -425,6 +464,7 @@ typedef struct packed // FPRegisterWriteStageRegPath
 `endif
 
     logic valid;  // Valid flag. If this is 0, its op is treated as NOP.
+    ThreadID threadID;
     FPIssueQueueEntry fpQueueData;
 
     PRegDataPath dataOut;   // Result of Execution
