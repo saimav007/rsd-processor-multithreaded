@@ -31,7 +31,6 @@ include Makefiles/CoreSources.inc.mk
 
 
 DEBUG_HELPERS = \
-	SysDeps/Verilator/VerilatorHelper.sv
 
 DEPS_RTL = \
 	$(TYPES:%=$(SOURCE_ROOT)%) \
@@ -67,13 +66,14 @@ VERILATOR_OPTION = \
 	--assert \
 	-sv \
     \
-	--exe ./SysDeps/Verilator/TestMain.cpp \
 	--top-module $(TOP_MODULE) \
 	$(VERILATOR_DISABLED_WARNING) \
 	$(RSD_VERILATOR_DEFINITION) \
 	--Mdir $(LIBRARY_WORK_RTL) \
 	+incdir+. \
-	--trace \
+        --trace \
+        --trace-structs \
+        -j 0 \
 	-CFLAGS "-Os -include limits" \
 	-output-split 15000 \
 	#-CFLAGS "-O0 -g" \
