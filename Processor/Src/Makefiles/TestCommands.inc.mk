@@ -204,9 +204,6 @@ test-Exception:
 test-DCache:
 	$(RUN_TEST_OMIT_MSG) Verification/TestCode/C/DCache
 
-test-RoundRobin:
-	$(RUN_TEST_OMIT_MSG) Verification/RoundRobin/TestRoundRobin_Top
-
 
 # Zephyr のテストターゲット
 # test-Zephyr-* の形でテストタスクを作る
