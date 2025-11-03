@@ -40,7 +40,6 @@ interface NextPCStageIF( input logic clk, rst, rstStart );
     modport PC(
     input
         clk, rst,
-        ThreadID tid, 
         pcWE, pcIn,
     output
         pcOut

@@ -29,6 +29,7 @@ module Gshare(
 
     logic stall, clear;
     PC_Path pcIn;
+    ThreadID curTid;  // Moved declaration here at module scope
 
     // Use combinational logic
     logic brPredTaken[FETCH_WIDTH];
@@ -139,7 +140,7 @@ module Gshare(
         pcIn = port.predNextPC;
 
         // Current thread
-        ThreadID curTid = port.predNextThreadID;
+        curTid = port.predNextThreadID;
 
         // Start from current histories
         for (int t = 0; t < NUM_THREADS; t++) begin

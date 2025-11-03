@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Config>
+  <MaxTestCycles>5000</MaxTestCycles>
+  <RegisterValues>
+    <!-- No specific register values needed for this testbench -->
+    <PC>0x0000</PC>
+  </RegisterValues>
+</Config>

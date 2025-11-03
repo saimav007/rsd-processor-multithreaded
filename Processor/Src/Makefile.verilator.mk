@@ -61,7 +61,7 @@ VERILATOR_OPTION = \
 	--cc \
 	--assert \
 	-sv \
-    --no-pch \
+    \
 	--exe ./SysDeps/Verilator/TestMain.cpp \
 	--top-module $(TOP_MODULE) \
 	$(VERILATOR_DISABLED_WARNING) \

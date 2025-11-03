@@ -126,6 +126,7 @@ interface RecoveryManagerIF( input logic clk, rst );
         phase,
         toRecoveryPhase,
         recoveredPC_FromRwCommit,
+        recoveredThreadID_FromRwCommit,  // Added this output signal
         toCommitPhase,
         flushRangeHeadPtr,
         flushRangeTailPtr,
