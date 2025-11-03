@@ -183,6 +183,7 @@ module ActiveList(
         StoreQueueIndexPath storeQueuePtr;
         logic valid;
         ExecutionState state;
+        ThreadID threadID;
     } RecoveryRegPath;
 
     ActiveListCountPath oldestAge;
@@ -244,6 +245,7 @@ module ActiveList(
                     nextRecoveryReg.loadQueuePtr = writeData[i].loadQueuePtr;
                     nextRecoveryReg.storeQueuePtr = writeData[i].storeQueuePtr;
                     nextRecoveryReg.pc = writeData[i].pc;
+                    nextRecoveryReg.threadID = writeData[i].threadID;
                     nextRecoveryReg.faultingDataAddr = writeData[i].dataAddr;
                     nextRecoveryReg.state = writeData[i].state;
 
@@ -283,6 +285,8 @@ module ActiveList(
         //これらのPCはRecoveryManagerのRecoveryRegisterを経由してFetchStageに送られる
         recovery.recoveredPC_FromCommitStage = ToAddrFromPC(recoveryReg.pc);
         recovery.recoveredPC_FromRwStage = ToAddrFromPC(nextRecoveryReg.pc);
+        recovery.recoveredThreadID_FromCommitStage = recoveryReg.threadID;
+        recovery.recoveredThreadID_FromRwStage = nextRecoveryReg.threadID;
 
         // Fault handling
         recovery.faultingDataAddr = recoveryReg.faultingDataAddr;

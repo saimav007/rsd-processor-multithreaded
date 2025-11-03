@@ -119,6 +119,7 @@ typedef struct packed // ActiveListWriteData
     LoadQueueIndexPath loadQueuePtr;
     StoreQueueIndexPath storeQueuePtr;
     ExecutionState      state;
+    ThreadID            threadID;
     PC_Path             pc;
     AddrPath            dataAddr;
     logic               isBranch;

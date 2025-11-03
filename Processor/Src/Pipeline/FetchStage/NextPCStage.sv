@@ -63,7 +63,9 @@ module NextPCStage(
 
             nextPhase = phase[0];
             for (int i = 0; i < INT_ISSUE_WIDTH; i++) begin
-                if (port.brResult[i].valid && port.brResult[i].mispred) begin
+                // Only check misprediction for the selected thread
+                if (port.brResult[i].valid && port.brResult[i].mispred && 
+                    port.brResult[i].threadID == selectedThread) begin
                     nextPhase = PHASE_WAIT;
                 end
             end
@@ -171,8 +173,13 @@ module NextPCStage(
         nextThreadID = selectedThread;
         threadSelected = FALSE;
 
+        // If recovery is ongoing, force nextThreadID to the recovery thread
+        if (recovery.toRecoveryPhase) begin
+            nextThreadID = recovery.recoveredThreadID_FromRwCommit;
+            threadSelected = TRUE;
+        end
         // If not stalled and successfully fetching, advance to next thread in round-robin
-        if (!stall && !clear && !port.rst && threadReady[selectedThread]) begin
+        else if (!stall && !clear && !port.rst && threadReady[selectedThread]) begin
             // Advance to next thread in round-robin order
             ThreadID nextCandidate = (selectedThread + 1) % NUM_THREADS;
             
@@ -240,6 +247,7 @@ module NextPCStage(
         end
         // To Branch predictor
         port.predNextPC = predNextPC;
+        port.predNextThreadID = selectedThread;
     end
 
 

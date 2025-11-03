@@ -96,6 +96,8 @@ module FPRegisterWriteStage(
             alWriteData[i].dataAddr = '0;
             alWriteData[i].isBranch = FALSE;
             alWriteData[i].isStore = FALSE;
+            // Thread awareness
+            alWriteData[i].threadID = pipeReg[i].threadID;
 
             // ExecState
             if ( update[i] && regValid[i] ) begin

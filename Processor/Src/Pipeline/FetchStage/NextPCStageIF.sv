@@ -19,6 +19,8 @@ interface NextPCStageIF( input logic clk, rst, rstStart );
     PC_Path  pcIn[NUM_THREADS];
 
     PC_Path  predNextPC;
+    // Thread ID whose PC is being predicted/fetched this cycle
+    ThreadID predNextThreadID;
 
     // Executed branch results for updating a branch predictor.
     // This signal is written back from a write back stage.
@@ -56,6 +58,7 @@ interface NextPCStageIF( input logic clk, rst, rstStart );
         pcWE,
         pcIn,
         predNextPC,
+        predNextThreadID,
         icNextReadAddrIn,
         nextStage
     );
@@ -77,6 +80,7 @@ interface NextPCStageIF( input logic clk, rst, rstStart );
         rst,
         rstStart,
         predNextPC,
+        predNextThreadID,
         brResult
     );
 
@@ -86,6 +90,7 @@ interface NextPCStageIF( input logic clk, rst, rstStart );
         rst,
         rstStart,
         predNextPC,
+        predNextThreadID,
         brResult
     );
 

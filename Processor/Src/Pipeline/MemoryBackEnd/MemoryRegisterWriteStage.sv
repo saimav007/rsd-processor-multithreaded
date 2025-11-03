@@ -106,6 +106,8 @@ module MemoryRegisterWriteStage(
 
             alWriteData[i].isBranch = FALSE;
             alWriteData[i].isStore = pipeReg[i].isStore;
+            // Thread awareness
+            alWriteData[i].threadID = pipeReg[i].threadID;
 
             // ExecState
             if ( update[i] ) begin

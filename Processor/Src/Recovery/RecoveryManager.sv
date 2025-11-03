@@ -177,6 +177,11 @@ module RecoveryManager(
 
         // Update a PC in a fetcher if branch misprediction occurs.
         port.recoveredPC_FromRwCommit = recoveredPC;
+        // Choose threadID matching the selected recovered PC source
+        port.recoveredThreadID_FromRwCommit = 
+            (regState.exceptionDetectedInCommitStage) ?
+                port.recoveredThreadID_FromCommitStage :
+                port.recoveredThreadID_FromRwStage;
         port.toCommitPhase = toCommitPhase;
 
         // To each logic to be recovered.

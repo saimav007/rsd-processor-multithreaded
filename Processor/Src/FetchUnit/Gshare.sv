@@ -44,9 +44,10 @@ module Gshare(
     PHT_IndexPath phtRA[FETCH_WIDTH];
     PHT_EntryPath phtRV[FETCH_WIDTH];
 
-    // Branch history for using predict.
-    BranchGlobalHistoryPath nextBrGlobalHistory, regBrGlobalHistory;
-    BranchGlobalHistoryPath brGlobalHistory [ FETCH_WIDTH ];
+    // Branch history per thread for prediction
+    BranchGlobalHistoryPath regBrGlobalHistory   [ NUM_THREADS ];
+    BranchGlobalHistoryPath nextBrGlobalHistory  [ NUM_THREADS ];
+    BranchGlobalHistoryPath brGlobalHistory      [ FETCH_WIDTH ];
 
     // assert when misprediction occured.
     logic mispred;
@@ -106,12 +107,16 @@ module Gshare(
     end
 
     always_ff @(posedge port.clk) begin
-        // update Branch Global History.
+        // update Branch Global History per thread.
         if (port.rst) begin
-            regBrGlobalHistory <= '0;
+            for (int t = 0; t < NUM_THREADS; t++) begin
+                regBrGlobalHistory[t] <= '0;
+            end
         end
         else begin
-            regBrGlobalHistory <= nextBrGlobalHistory;
+            for (int t = 0; t < NUM_THREADS; t++) begin
+                regBrGlobalHistory[t] <= nextBrGlobalHistory[t];
+            end
         end
 
         // Push Pht Queue
@@ -133,12 +138,18 @@ module Gshare(
     
         pcIn = port.predNextPC;
 
-        nextBrGlobalHistory = regBrGlobalHistory;
+        // Current thread
+        ThreadID curTid = port.predNextThreadID;
+
+        // Start from current histories
+        for (int t = 0; t < NUM_THREADS; t++) begin
+            nextBrGlobalHistory[t] = regBrGlobalHistory[t];
+        end
 
         for (int i = 0; i < FETCH_WIDTH; i++) begin
             brPredTaken[i] = FALSE;
-            // Output global history to pipeline for recovery.
-            brGlobalHistory[i] = regBrGlobalHistory;
+            // Output per-thread global history to pipeline for recovery of this fetch group
+            brGlobalHistory[i] = regBrGlobalHistory[curTid];
             updateHistory[i] = FALSE;
         end
 
@@ -154,8 +165,8 @@ module Gshare(
             // Generate next brGlobalHistory.
             if (updateHistory[i]) begin
                 // Shift history 1 bit to the left and reflect prediction direction in LSB.
-                nextBrGlobalHistory = 
-                    (nextBrGlobalHistory << 1) | brPredTaken[i];
+                nextBrGlobalHistory[curTid] = 
+                    (nextBrGlobalHistory[curTid] << 1) | brPredTaken[i];
                 
                 if (brPredTaken[i]) begin
                     // If brPred is taken, next instruction don't be executed.
@@ -174,6 +185,7 @@ module Gshare(
             phtWV[i] = '0;
             // Counter's value.
             phtPrevValue[i] = port.brResult[i].phtPrevValue; 
+            // Use the global history provided with this result (already from that thread)
             phtWA[i] = ToPHT_Index_Global(
                 port.brResult[i].brAddr,
                 port.brResult[i].globalHistory
@@ -207,21 +219,22 @@ module Gshare(
 
             // When miss prediction is occured, recovory history.
             if (mispred) begin
+                ThreadID resTid = port.brResult[i].threadID;
                 if (port.brResult[i].isCondBr) begin
-                    nextBrGlobalHistory = 
+                    nextBrGlobalHistory[resTid] = 
                         (port.brResult[i].globalHistory << 1) | port.brResult[i].execTaken;
                 end
                 else begin
-                    nextBrGlobalHistory = port.brResult[i].globalHistory;
+                    nextBrGlobalHistory[resTid] = port.brResult[i].globalHistory;
                 end
             end
         end
 
         for (int i = 0; i < FETCH_WIDTH; i++) begin
-            // Read PHT entry for next cycle (use PC ^ brGlobalHistory).
+            // Read PHT entry for next cycle (use PC ^ per-thread brGlobalHistory).
             phtRA[i] = ToPHT_Index_Global(
                 pcIn + i*INSN_BYTE_WIDTH,
-                nextBrGlobalHistory
+                nextBrGlobalHistory[curTid]
             );
         end
 

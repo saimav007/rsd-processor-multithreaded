@@ -38,6 +38,10 @@ interface RecoveryManagerIF( input logic clk, rst );
     AddrPath recoveredPC_FromCommitStage;
     AddrPath recoveredPC_FromRwStage;
     AddrPath recoveredPC_FromRwCommit;      // Correct PC
+    // Thread IDs for thread-aware recovery
+    ThreadID recoveredThreadID_FromCommitStage;
+    ThreadID recoveredThreadID_FromRwStage;
+    ThreadID recoveredThreadID_FromRwCommit;
 
     // For fault handling
     AddrPath faultingDataAddr;
@@ -112,6 +116,8 @@ interface RecoveryManagerIF( input logic clk, rst );
         wakeupPipelineRegFlushedOpExist,
         recoveredPC_FromCommitStage,
         recoveredPC_FromRwStage,
+        recoveredThreadID_FromCommitStage,
+        recoveredThreadID_FromRwStage,
         faultingDataAddr,
         notIssued,
         flushIQ_Entry,
@@ -152,6 +158,7 @@ interface RecoveryManagerIF( input logic clk, rst );
         toCommitPhase,
         toRecoveryPhase,
         recoveredPC_FromRwCommit,
+        recoveredThreadID_FromRwCommit,
         recoverFromRename,
         recoveredPC_FromRename
     );
@@ -435,6 +442,8 @@ interface RecoveryManagerIF( input logic clk, rst );
         refetchTypeFromRwStage,
         recoveredPC_FromCommitStage,
         recoveredPC_FromRwStage,
+        recoveredThreadID_FromCommitStage,
+        recoveredThreadID_FromRwStage,
         faultingDataAddr,
         flushAllInsns
     );

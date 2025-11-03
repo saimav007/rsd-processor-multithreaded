@@ -209,6 +209,9 @@ module IntegerExecutionStage(
             // 分岐orレジスタ間接分岐で，条件が有効ならTaken
             brTaken[i] = pipeReg[i].valid && isBranch[i] && isCondEnabled[i];
 
+            // Assign threadID to branch result
+            brResult[i].threadID = pipeReg[i].threadID;
+            
             // Whether this branch is conditional one or not.
             brResult[i].isCondBr = !isJump[i];
             

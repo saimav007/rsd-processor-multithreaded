@@ -102,6 +102,8 @@ module IntegerRegisterWriteStage(
             alWriteData[i].dataAddr = '0;
             alWriteData[i].isBranch = (iqData[i].opType inside { INT_MOP_TYPE_BR, INT_MOP_TYPE_RIJ });
             alWriteData[i].isStore = FALSE;
+            // Thread awareness
+            alWriteData[i].threadID = pipeReg[i].threadID;
 
             // Branch results.
             brResult[i] = pipeReg[i].brResult;

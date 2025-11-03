@@ -121,6 +121,7 @@ typedef struct packed // struct PhtQueueEntry
 
 typedef struct packed // struct BranchResult
 {
+    ThreadID threadID;  // Thread ID for multithreading support
     PC_Path brAddr;     // The address of a executed branch.
     PC_Path nextAddr;   // The next address of a executed branch.
     logic execTaken;    // The execution result of a branch's direction.
