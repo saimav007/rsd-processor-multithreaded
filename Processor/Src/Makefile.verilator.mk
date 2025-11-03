@@ -41,9 +41,14 @@ DEPS_RTL = \
 
 # Temporally disabled warnings
 VERILATOR_DISABLED_WARNING = \
+     -Wno-TIMESCALEMOD \
+     -Wno-WIDTHTRUNC \
      -Wno-WIDTH \
      -Wno-INITIALDLY \
      -Wno-UNOPTFLAT \
+     -Wno-CASEINCOMPLETE \
+     -Wno-CMPCONST \
+     -Wno-LATCH \
 
 # RSD specific constants
 # RSD_SRC_CFG is defined in Makefiles/CoreSources.inc.mk

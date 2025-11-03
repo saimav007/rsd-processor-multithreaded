@@ -515,8 +515,8 @@ module ICache(
             regMissTag <= '0;
             regSerial <= '0;
         end
-        `RSD_ASSERT_CLK(port.clk, $onehot0(we), "Signal we is not one-hot or 0.");
-        `RSD_ASSERT_CLK(port.clk, $onehot0(hit), "Signal hit is not one-hot or 0.");
+        `RSD_ASSERT_CLK(port.clk, $onehot0($unsigned(we)), "Signal we is not one-hot or 0.");
+        `RSD_ASSERT_CLK(port.clk, $onehot0($unsigned(hit)), "Signal hit is not one-hot or 0.");
     `endif
 `endif
     
